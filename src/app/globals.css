@@ -1,0 +1,27 @@
+@import url('https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-assistant: 'Assistant', sans-serif;
+}
+
+/* RTL כברירת מחדל */
+html {
+  direction: rtl;
+  font-family: var(--font-assistant), sans-serif;
+}
+
+body {
+  @apply bg-gray-50 text-gray-900 antialiased;
+  /* מניעת גלילה אופקית */
+  overflow-x: hidden;
+}
+
+/* Mobile-first: מגבלת רוחב כמו אפליקציה */
+#app-wrapper {
+  @apply max-w-md mx-auto min-h-screen bg-white relative;
+  box-shadow: 0 0 20px rgba(0,0,0,0.08);
+}
