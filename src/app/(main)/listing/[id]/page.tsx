@@ -45,7 +45,7 @@ export default function ListingDetailPage() {
 
     if (listing) {
       if (listing.listing_images) {
-        listing.listing_images.sort((a: {sort_order: number}, b:{sort_order: number}) => a.sort_order - b.sort_order)
+        listing.listing_images.sort((a: { sort_order: number }, b: { sort_order: number }) => a.sort_order - b.sort_order)
       }
       setListing(listing as Listing)
       setIsOwner(user?.id === listing.user_id)
@@ -59,7 +59,7 @@ export default function ListingDetailPage() {
     if (!listing || !userId) { router.push('/login'); return }
     setMsgLoading(true)
     const { data: convId, error } = await supabase.rpc('get_or_create_conversation', {
-      p_listing_id: listing.id,
+      p_listing_id:    listing.id,
       p_other_user_id: listing.user_id,
     })
     if (!error && convId) { router.push(`/messages/${convId}`) }
@@ -73,46 +73,75 @@ export default function ListingDetailPage() {
   }
 
   const handleShare = () => {
-    if (navigator.share) { navigator.share({ title: listing.vitle, url: window.location.href }) }
-    else { navigator.clipboard.writeText(window.location.href) }
+    if (navigator.share) {
+      navigator.share({ title: listing?.title, url: window.location.href })
+    } else {
+      navigator.clipboard.writeText(window.location.href)
+      alert('הקישור הועתק!')
+    }
   }
 
-  if (loading) return (
-    <div className="min-h-screen bg-white">
-      <TopBar showBack />
-      <div className="pt-14 space-y-4 p-4">
-        <div className="skeleton aspect-video rounded-2xl" />
-        <div className="skeleton h-6 w-3/4" />
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white">
+        <TopBar showBack />
+        <div className="pt-14 space-y-4 p-4">
+          <div className="skeleton aspect-video rounded-2xl" />
+          <div className="skeleton h-6 w-3/4" />
+          <div className="skeleton h-4 w-1/2" />
+        </div>
       </div>
-    </div>
-  )
+    )
+  }
 
-  if (!listing) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <TopBar showBack />
-      <p className="text-gray-500">המוד אנמצאה</p>
-    </div>
-  )
+  if (!listing) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <TopBar showBack />
+        <p className="text-gray-500 mt-14">המודעה לא נמצאה</p>
+      </div>
+    )
+  }
 
   const images = listing.listing_images ?? []
-  const rank = RANK_MAP[listing.profiles?.rank ?? 'new_neighbor']
+  const rank   = RANK_MAP[listing.profiles?.rank ?? 'new_neighbor']
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <TopBar showBack rightAction={<button onClick={handleShare} className="p-2"><Share2 size={20} /></button>} />
+      <TopBar
+        showBack
+        transparent={images.length > 0}
+        rightAction={
+          <button onClick={handleShare} className="p-2 text-gray-600">
+            <Share2 size={20} />
+          </button>
+        }
+      />
 
       {images.length > 0 ? (
         <div className="relative pt-14">
           <div className="aspect-[4/3] bg-gray-100 relative">
             <Image src={images[currentImg].url} alt={listing.title} fill className="object-cover" priority />
           </div>
-          <div className="flex gap-2 overflow-x-auto px-4 py-2 bg-white">
-            {images.map((img, i) => (
-              <button key={i} onClick={() => setCurrentImg(i)} className={cn('flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2', i === currentImg ? 'border-primary-500' : 'border-transparent')}>
-                <img src={img.url} className="w-full h-full object-cover" />
-              </button>
-            ))}
-          </div>
+          {images.length > 1 && (
+            <>
+              <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
+                {images.map((_, i) => (
+                  <button key={i} onClick={() => setCurrentImg(i)}
+                    className={cn('w-2 h-2 rounded-full transition-colors', i === currentImg ? 'bg-white' : 'bg-white/50')} />
+                ))}
+              </div>
+              <div className="flex gap-2 overflow-x-auto px-4 py-2 bg-white">
+                {images.map((img, i) => (
+                  <button key={i} onClick={() => setCurrentImg(i)}
+                    className={cn('flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-colors',
+                      i === currentImg ? 'border-primary-500' : 'border-transparent')}>
+                    <img src={img.url} className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       ) : (
         <div className="pt-14 aspect-[4/3] bg-gray-100 flex items-center justify-center">
@@ -123,48 +152,86 @@ export default function ListingDetailPage() {
       <div className="bg-white p-4 space-y-4">
         <div className="flex items-center gap-2 flex-wrap">
           <span className={cn('badge', typeColor(listing.type))}>
-            {listing.type === 'giveaway' && '🏁 חינם'}
-            {listing.type === 'sale' && '🏷️ למכירה'}
-            {listing.type === 'wanted' && '🔍 מחפש/ע'}
+            {listing.type === 'giveaway' && '🎁 חינם'}
+            {listing.type === 'sale'     && '🏷️ למכירה'}
+            {listing.type === 'wanted'   && '🔍 מחפש/ת'}
           </span>
-          {listing.categories && <span className="badge bg-gray-100 text-gray-600">{listing.categories.emoji } {listing.categories.name}</span>}
+          {listing.status !== 'available' && (
+            <span className={cn('badge', statusColor(listing.status))}>{STATUS_LABELS[listing.status]}</span>
+          )}
+          {listing.categories && (
+            <span className="badge bg-gray-100 text-gray-600">{listing.categories.emoji} {listing.categories.name}</span>
+          )}
         </div>
 
-        <h1 className="text-xl font-bold text-gray-900">{listing.title}</h1>
-        {listing.type === 'sale' && listing.price && <p className="text-2xl font-bold text-primary-700 mt-1">{formatPrice(listing.price)}</p>}
-        {listing.description && <p className="text-gray-700 text-sm leading-relaxed">{listing.description}</p>}
+        <div>
+          <h1 className="text-xl font-bold text-gray-900">{listing.title}</h1>
+          {listing.type === 'sale' && listing.price && (
+            <p className="text-2xl font-bold text-primary-700 mt-1">{formatPrice(listing.price)}</p>
+          )}
+          {listing.type === 'giveaway' && (
+            <p className="text-xl font-bold text-emerald-600 mt-1">חינם 🎁</p>
+          )}
+        </div>
+
+        {listing.description && (
+          <p className="text-gray-700 text-sm leading-relaxed">{listing.description}</p>
+        )}
 
         <div className="flex items-center gap-4 text-sm text-gray-500">
-          {(listing.neighborhoods?.name || listing.cities?.name) && <span className="flex items-center gap-1"><MapPin size={14} />{listing.neighborhoods?.name}{listing.cities?.name && `, ${listing.cities.name}`}</span>}
+          {(listing.neighborhoods?.name || listing.cities?.name) && (
+            <span className="flex items-center gap-1">
+              <MapPin size={14} />
+              {listing.neighborhoods?.name}{listing.cities?.name && `, ${listing.cities.name}`}
+            </span>
+          )}
           <span>{timeAgo(listing.created_at)}</span>
+          <span>{listing.views_count} צפיות</span>
         </div>
       </div>
 
       <div className="bg-white mt-2 p-4 flex items-center gap-3">
         <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
-          {listing.profiles?.avatar_url ? <img src={listing.profiles.avatar_url} className="w-full h-full object-cover" /> : <span className="text-xl">{listing.profiles?.display_name?.charAt(0) ?? '?'}</span>}
+          {listing.profiles?.avatar_url ? (
+            <img src={listing.profiles.avatar_url} className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-xl">{listing.profiles?.display_name?.charAt(0) ?? '?'}</span>
+          )}
         </div>
         <div className="flex-1">
           <p className="font-semibold text-gray-900 text-sm">{listing.profiles?.display_name}</p>
-          <p className={cn('text-xs font-medium', rank.color)}>{rank.emoji } {rank.label}</p>
+          <p className={cn('text-xs font-medium', rank.color)}>{rank.emoji} {rank.label}</p>
         </div>
       </div>
 
-      <div className="fixed bottom-0 right-0 left-0 max-w-md mx-auto bg-white border-t p-4">
+      <div className="fixed bottom-0 right-0 left-0 max-w-md mx-auto bg-white border-t border-gray-100 p-4 safe-bottom">
         {isOwner ? (
-          <div className="grid grid-cols-3 gap-2">
-            {{(['available', 'reserved', 'completed'] as const).map(s => (
-              <button key={s} onClick={() => handleStatusChange(s)} className={cn('py-2.5 rounded-xl text-xs font-semibold border-2', listing.status === s ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-gray-200 bg-gray-50 text-gray-500')}>
-                {STATUS_LABELS[s]}
-              </button>
-            ))}
+          <div className="space-y-2">
+            <p className="text-xs text-gray-500 text-center font-medium">ניהול מודעה שלך</p>
+            <div className="grid grid-cols-3 gap-2">
+              {(['available', 'reserved', 'completed'] as const).map(s => (
+                <button key={s} onClick={() => handleStatusChange(s)}
+                  className={cn('py-2.5 rounded-xl text-xs font-semibold border-2 transition-colors',
+                    listing.status === s ? 'border-primary-500 bg-primary-50 text-primary-700' : 'border-gray-200 bg-gray-50 text-gray-500')}>
+                  {STATUS_LABELS[s]}
+                </button>
+              ))}
+            </div>
           </div>
         ) : (
           <div className="flex gap-3">
-            <button onClick={handleContact} disabled={msgLoading || listing.status === 'completed'} className="btn-primary flex-1 flex items-center justify-center gap-2">
+            <button onClick={handleContact} disabled={msgLoading || listing.status === 'completed'}
+              className="btn-primary flex-1 flex items-center justify-center gap-2">
               <MessageCircle size={18} />
-              {msgLoading ? 'פו귗 שיחה...' : 'שלח הודעה'}
+              {msgLoading ? 'פותח שיחה...' : 'שלח הודעה'}
             </button>
+            {listing.whatsapp_visible && listing.profiles?.whatsapp_phone && (
+              <a href={`https://wa.me/${listing.profiles.whatsapp_phone}?text=היי, ראיתי את המודעה שלך: ${listing.title}`}
+                target="_blank" rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 px-4 py-3 bg-green-500 text-white font-semibold rounded-xl">
+                <Phone size={18} />וואטסאפ
+              </a>
+            )}
           </div>
         )}
       </div>
