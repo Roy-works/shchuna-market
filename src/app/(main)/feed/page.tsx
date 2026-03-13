@@ -15,7 +15,7 @@ export default function FeedPage() {
   const [activeTab,    setActiveTab]    = useState<ListingType>('giveaway')
   const [listings,     setListings]     = useState<Listing[]>([])
   const [loading,      setLoading]      = useState(true)
-  const [cityName,     setCityName]     = useState('כל הארץ')
+  const [cityName,     setCityName]     = useState('×× ×××¨×¥')
   const [showCityPick, setShowCityPick] = useState(false)
   const [filters, setFilters] = useState<FiltersState>({
     search:     '',
@@ -24,7 +24,7 @@ export default function FeedPage() {
     freeOnly:   false,
   })
 
-  // טען מיקום ברירת מחדל של המשתמש
+  // ××¢× ×××§×× ××¨××¨×ª ×××× ×©× ×××©×ª××©
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return
@@ -36,7 +36,7 @@ export default function FeedPage() {
       if (profile?.city_id) {
         setFilters(f => ({ ...f, cityId: profile.city_id! }))
         // @ts-ignore
-        setCityName(profile.cities?.name ?? 'כל הארץ')
+        setCityName(profile.cities?.name ?? '×× ×××¨×¥')
       }
     })
   }, [])
@@ -57,7 +57,7 @@ export default function FeedPage() {
       .eq('type', activeTab)
       .in('status', ['available', 'reserved'])
       .gt('expires_at', new Date().toISOString())
-      .order('status', { ascending: true })   // available ראשון
+      .order('status', { ascending: true })   // available ×¨××©××
       .order('created_at', { ascending: false })
       .limit(50)
 
@@ -76,20 +76,20 @@ export default function FeedPage() {
   useEffect(() => { fetchListings() }, [fetchListings])
 
   const emptyMessages: Record<ListingType, string> = {
-    giveaway: 'אין מוצרים חינם בשכונה כרגע. היה הראשון לפרסם!',
-    sale:     'אין מוצרים למכירה בשכונה כרגע.',
-    wanted:   'אין בקשות "מחפש/ת" כרגע.',
+    giveaway: '××× ×××¦×¨×× ××× × ××©××× × ××¨××¢. ××× ××¨××©×× ××¤×¨×¡×!',
+    sale:     '××× ×××¦×¨×× ×××××¨× ××©××× × ××¨××¢.',
+    wanted:   '××× ××§×©××ª "×××¤×©/×ª" ××¨××¢.',
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white sticky top-0 z-30">
-        {/* לוגו + מיקום */}
+        {/* ×××× + ×××§×× */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
           <div className="flex items-center gap-2">
-            <span className="text-xl">🏘️</span>
-            <span className="font-bold text-gray-900 text-base">שכונה מרקט</span>
+            <span className="text-xl">ðï¸</span>
+            <span className="font-bold text-gray-900 text-base">×©××× × ××¨×§×</span>
           </div>
           <button
             onClick={() => setShowCityPick(!showCityPick)}
@@ -102,7 +102,7 @@ export default function FeedPage() {
           </button>
         </div>
 
-        {/* 3 טאבים */}
+        {/* 3 ××××× */}
         <div className="flex border-b border-gray-100">
           {TABS.map(tab => (
             <button
@@ -121,7 +121,7 @@ export default function FeedPage() {
           ))}
         </div>
 
-        {/* פילטרים */}
+        {/* ×¤××××¨×× */}
         <ListingFilters
           filters={filters}
           onChange={setFilters}
@@ -129,7 +129,7 @@ export default function FeedPage() {
         />
       </div>
 
-      {/* רשימת מודעות */}
+      {/* ×¨×©×××ª ××××¢××ª */}
       <ListingGrid
         listings={listings}
         loading={loading}

@@ -56,7 +56,7 @@ export default function ProfilePage() {
   if (loading || !profile) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <TopBar title="פרופיל שלי" />
+        <TopBar title="×¤×¨××¤×× ×©××" />
         <div className="pt-14 p-4 space-y-4">
           <div className="skeleton h-24 rounded-2xl" />
           <div className="skeleton h-16 rounded-2xl" />
@@ -68,17 +68,17 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <TopBar
-        title="פרופיל שלי"
+        title="×¤×¨××¤×× ×©××"
         rightAction={
           <button onClick={handleLogout} className="flex items-center gap-1 text-sm text-red-500 font-medium">
             <LogOut size={16} />
-            יציאה
+            ××¦×××
           </button>
         }
       />
 
       <div className="pt-14">
-        {/* כרטיס פרופיל */}
+        {/* ××¨×××¡ ×¤×¨××¤×× */}
         <div className="bg-white px-4 py-6 flex items-center gap-4">
           <div className="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center text-2xl font-bold text-primary-700 flex-shrink-0">
             {profile.display_name.charAt(0)}
@@ -90,18 +90,18 @@ export default function ProfilePage() {
             </p>
             {(profile.neighborhoods || profile.cities) && (
               <p className="text-xs text-gray-400 mt-0.5">
-                Pin {profile.neighborhoods?.name ?? ''}{profile.cities?.name ? `, ${profile.cities.name}` : ''}
+                ð {profile.neighborhoods?.name ?? ''}{profile.cities?.name ? `, ${profile.cities.name}` : ''}
               </p>
             )}
           </div>
         </div>
 
-        {/* סטטיס פרופיל */}
+        {/* ×¡××××¡×××§××ª */}
         <div className="grid grid-cols-3 gap-0 bg-white mt-0.5">
           {[
-            { icon: <Package size={18} />, value: profile.total_listings, label: 'מודעות' },
-            { icon: <Gift    size={18} />, value: profile.total_giveaways, label: 'מתנות' },
-            { icon: <CheckCircle size={18} />, value: profile.total_completed, label: 'הושלמו' },
+            { icon: <Package size={18} />, value: profile.total_listings, label: '××××¢××ª' },
+            { icon: <Gift    size={18} />, value: profile.total_giveaways, label: '××ª× ××ª' },
+            { icon: <CheckCircle size={18} />, value: profile.total_completed, label: '×××©×××' },
           ].map(({ icon, value, label }) => (
             <div key={label} className="flex flex-col items-center py-4 border-r border-gray-100 last:border-0">
               <div className="text-primary-500 mb-1">{icon}</div>
@@ -111,12 +111,12 @@ export default function ProfilePage() {
           ))}
         </div>
 
-        {/* טאביםה: */}
+        {/* ×××××: ××××¢××ª ×¤×¢××××ª / ×××©××× */}
         <div className="bg-white mt-2">
           <div className="flex border-b border-gray-100">
             {([
-              { key: 'active',    label: `פעילות (${activeListing.length})` },
-              { key: 'completed', label: `הותלממו (${completedListings.length})` },
+              { key: 'active',    label: `×¤×¢××××ª (${activeListing.length})` },
+              { key: 'completed', label: `×××©××× (${completedListings.length})` },
             ] as const).map(tab => (
               <button
                 key={tab.key}
@@ -141,7 +141,7 @@ export default function ProfilePage() {
 
           {(activeTab === 'active' ? activeListing : completedListings).length === 0 && (
             <div className="text-center py-10 text-gray-400 text-sm">
-              {activeTab === 'active' ? 'אין ממודעות פעילות' : 'אין ממודעות שמושלמו' }
+              {activeTab === 'active' ? '××× ××××¢××ª ×¤×¢××××ª' : '××× ××××¢××ª ×©×××©×××'}
             </div>
           )}
         </div>

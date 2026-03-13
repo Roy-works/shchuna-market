@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'שכונה מרקט',
-  description: 'שוק שכונתי קהילתי – חינם, מכירה, ומחפשים',
+  title: '×©××× × ××¨×§×',
+  description: '×©××§ ×©××× ×ª× ×§××××ª× â ××× ×, ××××¨×, ××××¤×©××',
   manifest: '/manifest.json',
   icons: {
     icon:  '/favicon.ico',

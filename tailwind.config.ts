@@ -1,4 +1,44 @@
 import type { Config } from 'tailwindcss'
+
 const config: Config = {
-  content: ['./src/**/*.{js,ts,jsx,tsx}'],
-  theme: { extend: { colors: { primary:{50:'#f0fdf4',100:'#dcfce7',200:'#bbf7d0',300:'#86efac',400:'#4ade80',500:'#22c55e',600:'#16a34a',700:'#15803d',800:'#166534',g00:'#14532d'},giveaway:{DEFAULT='#10b981',light:'#d1fae5'},sale:{DEFAULT:'#3b82f6',light:'#dbeafe'},wanted:{DEFAULT='#f59e0b',light:'#fef3c7'}},fontFamily:{sans:[¯ùŸÖ»†¥µôΩπ–µÖÕÕ•Õ—Öπ–§ú∞ùÕÖπÃµÕï…•òùuııÙ±¡±’ù•πÃÈmuÙ)ï·¡Ω…–ÅëïôÖ’±–ÅçΩπô•ú
+  content: [
+    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          50:  '#f0fdf4',
+          100: '#dcfce7',
+          200: '#bbf7d0',
+          300: '#86efac',
+          400: '#4ade80',
+          500: '#22c55e',
+          600: '#16a34a',
+          700: '#15803d',
+          800: '#166534',
+          900: '#14532d',
+        },
+        giveaway: {
+          DEFAULT: '#10b981',
+          light:   '#d1fae5',
+        },
+        sale: {
+          DEFAULT: '#3b82f6',
+          light:   '#dbeafe',
+        },
+        wanted: {
+          DEFAULT: '#f59e0b',
+          light:   '#fef3c7',
+        },
+      },
+      fontFamily: {
+        sans: ['var(--font-assistant)', 'sans-serif'],
+      },
+    },
+  },
+  plugins: [],
+}
+export default config
