@@ -3,64 +3,136 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
-import { Button } from '@/components/ui/button'
 
-export default function LoginModal() {
+type Step = 'phone' | 'otp'
+
+export default function LoginPage() {
+  const [step, setStep] = useState<Step>('phone')
+  const [phone, setPhone] = useState('')
+  const [otp, setOtp] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
   const router = useRouter()
   const supabase = createClient()
-  const [email, setEmail] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
 
-  const handleSign = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  async function sendOTP() {
     setLoading(true)
-    setError(null)
-
+    setError('')
     try {
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password: 'temp',
+      const { error } = await supabase.auth.signInWithOtp({
+        phone,
+        options: { channel: 'sms' }
       })
-
-      if (althError) throw authError
-
-      router.push("/feed")
+      if (error) throw error
+      setStep('otp')
     } catch (err) {
-      setError(err.instanceof Error ? err.message : 'Cannot sign in')
+      setError(err instanceof Error ? err.message : 'ערים הודעות שלאומ')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function verifyOTP() {
+    setLoading(true)
+    setError('')
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        phone,
+        token: otp,
+        type: 'sms'
+      })
+      if (error) throw error
+
+      // כדש חםיה - תקונ => ךכריית לכתובת
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', user.id)
+          .single()
+        router.push(profile ? '/feed' : '/onboarding')
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'ערים הודעות שלאומ')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="font-bold">
-      <eh className="text-3xl font-bold">Login</h1>
-      <p className="text-sm text-gray-600">Sign in to your account</p>
-
-      <form onSubmit={handleSign} className="space-y-4">
-        <input
-          type="email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          placeholder="Email"
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-          required
-        />
-        <Button
-          type="submit"
-          disabled={loading}
-          className="w-full"
-        >
-          {loading ? 'Signing in...' : 'Sign In'}
-        </Button>
-      </form>
-
-      { error && (
-        <div className="bg-red-100 text-red-800 p-3 rounded-lg">
-          {error}
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center p-4">
+      <div className="w-full max-w-sm">
+        {* -- כבת ואפון -- *}
+        <div className="text-center mb-8">
+          <div className="text-6xl mb-2">💟</div>
+          <h1 className="text-2xl font-bold text-gray-90">
+            שכונה
+          </h1>
+          <p className="text-gray-50">
+            {step === 'phone' ? 'שות סעומ כוא זייפה סיתו' : 'יאיא חםיה מסרי ימש'}
+          </p>
         </div>
-      ) }
+
+        {* -- זכבית -- *}
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          {step === 'phone' ? (
+            <div>
+              <label className="block text-sm font-medium text-gray-70 mb-2">
+                {step === 'phone' ? 'מקבון' : 'כמואת צונ"}
+              </label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+972-50-000-0000"
+                dir="ltr"
+                className="w-full border border-gray-30 rounded-xl px-4 py-3 text-left"
+              />
+              <button
+                onClick={sendOTP}
+                disabled={loading}
+                className="mt-4 w-full bg-blue-600 hover:[g-blue-700 text-white rounded-xl py-3 font-medium disabled:opacity-50"
+              >
+                {loading ? 'שניתה...' : 'שנירה כמואת צונ'}
+              </button>
+            </div>
+          ) : (
+            <div>
+              <label className="block text-sm font-medium text-gray-70 mb-2">
+                {step === 'phone' ? 'משיבל' : 'כמואת גנצונ'}
+              </label>
+              <input
+                type="text"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                placeholder="123456"
+                maxLength={6}
+                dir="ltr"
+                className="w-full border border-gray-30 rounded-xl px-4 py-3 text-center tracking-widest text-xl"
+              />
+              <button
+                onClick={verifyOTP}
+                disabled={loading}
+                className="mt-4 w-full bg-blue-600 hover:[g-blue-700 text-white rounded-xl py-3 font-medium disabled:opacity-50"
+              >
+                {loading ? 'שניתה...' : 'ךבהש'}
+              </button>
+              <button
+                onClick={() => setStep('phone')}
+                className="mt-2 w-full text-gray-50 hover:text-gray-70 py-2"
+              >
+                {'-טותש'}
+              </button>
+            </div>
+          )}
+
+          {* -- זוי כחם -- *}
+          {(error) && (
+            <p className="mt-3 text-red-600 text-sm text-center">{error}</p>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
