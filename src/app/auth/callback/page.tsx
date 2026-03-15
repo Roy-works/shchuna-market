@@ -10,65 +10,36 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     const supabase = createClient()
 
-    const handleCallback = async () => {
-      try {
-        const url = new URL(window.location.href)
-        const code = url.searchParams.get('code')
-        const token_hash = url.searchParams.get('token_hash')
-        const type = url.searchParams.get('type')
+    // onAuthStateChange fires automatically when supabase processes
+    // the #access_token hash fragment from the magic link
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'SIGNED_IN' && session) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('neighborhood_id')
+            .eq('id', session.user.id)
+            .single()
 
-        let userId: string | null = null
-
-        if (code) {
-          // PKCE flow - most common with @supabase/ssr
-          const { data, error } = await supabase.auth.exchangeCodeForSession(code)
-          if (error || !data.session) {
-            router.replace('/login')
-            return
-          }
-          userId = data.session.user.id
-        } else if (token_hash && type) {
-          // Token hash flow
-          const { data, error } = await supabase.auth.verifyOtp({
-            token_hash,
-            type: type as 'email' | 'recovery' | 'invite' | 'magiclink',
-          })
-          if (error || !data.session) {
-            router.replace('/login')
-            return
-          }
-          userId = data.session.user.id
-        } else {
-          // Implicit / hash flow - Supabase processes URL hash automatically
-          await new Promise(r => setTimeout(r, 300))
-          const { data: { session } } = await supabase.auth.getSession()
-          if (!session) {
-            router.replace('/login')
-            return
-          }
-          userId = session.user.id
+          router.replace(!profile?.neighborhood_id ? '/onboarding' : '/feed')
         }
+      }
+    )
 
-        if (!userId) {
-          router.replace('/login')
-          return
-        }
-
-        // Check if user has completed onboarding
+    // Also handle case where session already exists (e.g. page reload)
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session) {
         const { data: profile } = await supabase
           .from('profiles')
           .select('neighborhood_id')
-          .eq('id', userId)
+          .eq('id', session.user.id)
           .single()
 
         router.replace(!profile?.neighborhood_id ? '/onboarding' : '/feed')
-      } catch (err) {
-        console.error('Auth callback error:', err)
-        router.replace('/login')
       }
-    }
+    })
 
-    handleCallback()
+    return () => subscription.unsubscribe()
   }, [router])
 
   return (
