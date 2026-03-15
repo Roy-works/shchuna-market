@@ -4,36 +4,27 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 
-type Step = 'phone' | 'otp'
+type Step = 'email' | 'otp'
 
 export default function LoginPage() {
   const router   = useRouter()
   const supabase = createClient()
 
-  const [step,    setStep]    = useState<Step>('phone')
-  const [phone,   setPhone]   = useState('')
+  const [step,    setStep]    = useState<Step>('email')
+  const [email,   setEmail]   = useState('')
   const [otp,     setOtp]     = useState('')
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState('')
-
-  // פורמט מספר טלפון ישראלי
-  const formatPhone = (raw: string) => {
-    const digits = raw.replace(/\D/g, '')
-    if (digits.startsWith('0')) return '+972' + digits.slice(1)
-    if (digits.startsWith('972')) return '+' + digits
-    return '+972' + digits
-  }
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setLoading(true)
 
-    const formatted = formatPhone(phone)
-    const { error } = await supabase.auth.signInWithOtp({ phone: formatted })
+    const { error } = await supabase.auth.signInWithOtp({ email })
 
     if (error) {
-      setError('שגיאה בשליחת קוד. בדוק את מספר הטלפון ונסה שוב.')
+      setError('שגיאה בשליחת קוד. בדוק את כתובת האימייל ונסה שוב.')
     } else {
       setStep('otp')
     }
@@ -45,11 +36,10 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
 
-    const formatted = formatPhone(phone)
     const { data, error } = await supabase.auth.verifyOtp({
-      phone: formatted,
+      email,
       token: otp,
-      type:  'sms',
+      type: 'email',
     })
 
     if (error) {
@@ -59,7 +49,6 @@ export default function LoginPage() {
     }
 
     if (data.user) {
-      // בדוק אם יש פרופיל
       const { data: profile } = await supabase
         .from('profiles')
         .select('neighborhood_id')
@@ -85,32 +74,26 @@ export default function LoginPage() {
       </div>
 
       <div className="w-full bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-
-        {step === 'phone' ? (
+        {step === 'email' ? (
           <form onSubmit={handleSendOtp} className="space-y-5">
             <div>
               <h2 className="text-xl font-bold text-gray-900 mb-1">כניסה / הרשמה</h2>
-              <p className="text-sm text-gray-500">הכנס מספר טלפון ישראלי</p>
+              <p className="text-sm text-gray-500">הכנס כתובת אימייל</p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                מספר טלפון
+                כתובת אימייל
               </label>
-              <div className="relative">
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
-                  🇮🇱 +972
-                </span>
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={e => setPhone(e.target.value)}
-                  placeholder="050-000-0000"
-                  className="input-field pr-20"
-                  required
-                  dir="ltr"
-                />
-              </div>
+              <input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="input-field"
+                required
+                dir="ltr"
+              />
             </div>
 
             {error && <p className="text-red-500 text-sm">{error}</p>}
@@ -120,7 +103,7 @@ export default function LoginPage() {
             </button>
 
             <p className="text-xs text-gray-400 text-center">
-              נשלח SMS עם קוד חד-פעמי למספרך
+              נשלח קוד חד-פעמי לכתובת האימייל שלך
             </p>
           </form>
         ) : (
@@ -128,7 +111,7 @@ export default function LoginPage() {
             <div>
               <h2 className="text-xl font-bold text-gray-900 mb-1">הכנס קוד אימות</h2>
               <p className="text-sm text-gray-500">
-                שלחנו SMS ל-{phone}
+                שלחנו קוד ל-{email}
               </p>
             </div>
 
@@ -157,10 +140,10 @@ export default function LoginPage() {
 
             <button
               type="button"
-              onClick={() => { setStep('phone'); setOtp(''); setError('') }}
+              onClick={() => { setStep('email'); setOtp(''); setError('') }}
               className="w-full text-sm text-gray-500 text-center py-1"
             >
-              שנה מספר טלפון
+              שנה כתובת אימייל
             </button>
           </form>
         )}
