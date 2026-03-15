@@ -8,7 +8,7 @@
   --font-assistant: 'Assistant', sans-serif;
 }
 
-/* RTL ×××¨××¨×ª ×××× */
+/* RTL */
 html {
   direction: rtl;
   font-family: var(--font-assistant), sans-serif;
@@ -16,83 +16,62 @@ html {
 
 body {
   @apply bg-gray-50 text-gray-900 antialiased;
-  /* ×× ××¢×ª ××××× ×××¤×§××ª */
   overflow-x: hidden;
 }
 
-/* Mobile-first: ×××××ª ×¨××× ××× ××¤×××§×¦×× */
 #app-wrapper {
   @apply max-w-md mx-auto min-h-screen bg-white relative;
   box-shadow: 0 0 20px rgba(0,0,0,0.08);
 }
 
-/* Safe area ××××©××¨×× ×¢× notch */
 .safe-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* ××¨×××¡ */
 .card {
   @apply bg-white rounded-2xl shadow-sm border border-gray-100;
 }
 
-/* ××¤×ª××¨ ×¨××©× */
 .btn-primary {
   @apply bg-primary-600 text-white font-semibold py-3 px-6 rounded-xl
          active:scale-95 transition-all duration-150 disabled:opacity-50
          disabled:cursor-not-allowed w-full text-center;
 }
 
-/* ××¤×ª××¨ ××©× × */
 .btn-secondary {
   @apply bg-gray-100 text-gray-800 font-semibold py-3 px-6 rounded-xl
          active:scale-95 transition-all duration-150 w-full text-center;
 }
 
-/* ×©×× ×§×× */
 .input-field {
   @apply w-full border border-gray-200 rounded-xl px-4 py-3
          focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
          bg-white text-gray-900 placeholder-gray-400;
 }
 
-/* Badge */
 .badge {
   @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold;
 }
 
-/* Bottom nav height */
-.bottom-nav-spacer {
-  height: 72px;
-}
+.bottom-nav-spacer { height: 72px; }
+.topbar-spacer { height: 60px; }
 
-/* ×¨××¤×× ×¢×××× ××ª××× ××ª××ª ××-topbar */
-.topbar-spacer {
-  height: 60px;
-}
-
-/* ×× ×××¦×× ×¢××× × */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.fade-in {
-  animation: fadeIn 0.2s ease-out;
-}
+.fade-in { animation: fadeIn 0.2s ease-out; }
 
-/* Skeleton loading */
 .skeleton {
   @apply bg-gray-200 rounded-lg animate-pulse;
 }
 
-/* ×× ××¢×ª ××××¨×ª ××§×¡× ×××¤×ª××¨×× */
 button, a {
   -webkit-tap-highlight-color: transparent;
   user-select: none;
 }
 
-/* ××××× ×××§× */
 * {
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
