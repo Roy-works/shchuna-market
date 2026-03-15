@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 
-type Step = 'email' | 'otp'
+type Step = 'email' | 'sent'
 
 export default function LoginPage() {
   const router   = useRouter()
@@ -12,54 +12,25 @@ export default function LoginPage() {
 
   const [step,    setStep]    = useState<Step>('email')
   const [email,   setEmail]   = useState('')
-  const [otp,     setOtp]     = useState('')
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState('')
 
-  const handleSendOtp = async (e: React.FormEvent) => {
+  const handleSendLink = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setLoading(true)
 
-    const { error } = await supabase.auth.signInWithOtp({ email })
-
-    if (error) {
-      setError('שגיאה בשליחת קוד. בדוק את כתובת האימייל ונסה שוב.')
-    } else {
-      setStep('otp')
-    }
-    setLoading(false)
-  }
-
-  const handleVerifyOtp = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-
-    const { data, error } = await supabase.auth.verifyOtp({
+    const { error } = await supabase.auth.signInWithOtp({
       email,
-      token: otp,
-      type: 'email',
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
     })
 
     if (error) {
-      setError('קוד שגוי. נסה שוב.')
-      setLoading(false)
-      return
-    }
-
-    if (data.user) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('neighborhood_id')
-        .eq('id', data.user.id)
-        .single()
-
-      if (!profile?.neighborhood_id) {
-        router.push('/onboarding')
-      } else {
-        router.push('/feed')
-      }
+      setError('שגיאה בשליחת הקישור. בדוק את כתובת האימייל ונסה שוב.')
+    } else {
+      setStep('sent')
     }
     setLoading(false)
   }
@@ -75,10 +46,10 @@ export default function LoginPage() {
 
       <div className="w-full bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         {step === 'email' ? (
-          <form onSubmit={handleSendOtp} className="space-y-5">
+          <form onSubmit={handleSendLink} className="space-y-5">
             <div>
               <h2 className="text-xl font-bold text-gray-900 mb-1">כניסה / הרשמה</h2>
-              <p className="text-sm text-gray-500">הכנס כתובת אימייל</p>
+              <p className="text-sm text-gray-500">הכנס כתובת אימייל לקבלת קישור כניסה</p>
             </div>
 
             <div>
@@ -99,53 +70,38 @@ export default function LoginPage() {
             {error && <p className="text-red-500 text-sm">{error}</p>}
 
             <button type="submit" className="btn-primary" disabled={loading}>
-              {loading ? 'שולח קוד...' : 'שלח קוד אימות'}
+              {loading ? 'שולח...' : 'שלח קישור כניסה'}
             </button>
 
             <p className="text-xs text-gray-400 text-center">
-              נשלח קוד חד-פעמי לכתובת האימייל שלך
+              נשלח קישור כניסה חד-פעמי לאימייל שלך
             </p>
           </form>
         ) : (
-          <form onSubmit={handleVerifyOtp} className="space-y-5">
+          <div className="space-y-5 text-center">
+            <div className="text-5xl">📧</div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-1">הכנס קוד אימות</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-1">בדוק את האימייל שלך</h2>
               <p className="text-sm text-gray-500">
-                שלחנו קוד ל-{email}
+                שלחנו קישור כניסה ל-<span className="font-medium text-gray-700" dir="ltr">{email}</span>
+              </p>
+              <p className="text-sm text-gray-500 mt-2">
+                לחץ על הקישור במייל כדי להיכנס לאפליקציה
               </p>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                קוד אימות (6 ספרות)
-              </label>
-              <input
-                type="text"
-                value={otp}
-                onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                placeholder="123456"
-                className="input-field text-center text-2xl tracking-widest"
-                maxLength={6}
-                inputMode="numeric"
-                required
-                dir="ltr"
-              />
+            <div className="bg-primary-50 rounded-xl p-4 text-sm text-primary-700">
+              💡 לא קיבלת? בדוק ב-Spam או לחץ לשלוח שוב
             </div>
-
-            {error && <p className="text-red-500 text-sm">{error}</p>}
-
-            <button type="submit" className="btn-primary" disabled={loading || otp.length !== 6}>
-              {loading ? 'מאמת...' : 'אמת קוד'}
-            </button>
 
             <button
               type="button"
-              onClick={() => { setStep('email'); setOtp(''); setError('') }}
+              onClick={() => { setStep('email'); setError('') }}
               className="w-full text-sm text-gray-500 text-center py-1"
             >
               שנה כתובת אימייל
             </button>
-          </form>
+          </div>
         )}
       </div>
 
