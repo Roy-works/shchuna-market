@@ -10,36 +10,51 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     const supabase = createClient()
 
-    // onAuthStateChange fires automatically when supabase processes
-    // the #access_token hash fragment from the magic link
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'SIGNED_IN' && session) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('neighborhood_id')
-            .eq('id', session.user.id)
-            .single()
+    async function handleCallback() {
+      const code = new URLSearchParams(window.location.search).get('code')
 
-          router.replace(!profile?.neighborhood_id ? '/onboarding' : '/feed')
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code)
+        if (error) {
+          console.error('exchangeCodeForSession error:', error.message)
+          router.replace('/login')
+          return
         }
       }
-    )
 
-    // Also handle case where session already exists (e.g. page reload)
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      const { data: { session } } = await supabase.auth.getSession()
+
       if (session) {
         const { data: profile } = await supabase
           .from('profiles')
           .select('neighborhood_id')
           .eq('id', session.user.id)
           .single()
-
         router.replace(!profile?.neighborhood_id ? '/onboarding' : '/feed')
+        return
       }
-    })
 
-    return () => subscription.unsubscribe()
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        async (event, session) => {
+          if (event === 'SIGNED_IN' && session) {
+            subscription.unsubscribe()
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('neighborhood_id')
+              .eq('id', session.user.id)
+              .single()
+            router.replace(!profile?.neighborhood_id ? '/onboarding' : '/feed')
+          }
+        }
+      )
+
+      setTimeout(() => {
+        subscription.unsubscribe()
+        router.replace('/login')
+      }, 8000)
+    }
+
+    handleCallback()
   }, [router])
 
   return (
